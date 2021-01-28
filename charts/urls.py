@@ -5,4 +5,5 @@ urlpatterns = [
     path('', views.index, name='charts'),
     path('api/data/', views.get_data, name='get_data'),
     path('api/chart/data/', views.ChartData.as_view(), name='chart_data'),
+    path('api/test/run/', views.RunSpeedTest.as_view(), name='test_run'),
 ]

@@ -11,6 +11,7 @@ django-filter = "*"
 psycopg2 = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
+speedtest-cli = "*"
 
 [dev-packages]
 
