@@ -22,14 +22,24 @@ def get_data(reqest):
 
 
 class ChartData(APIView):
-    User = get_user_model()
     authentication_classes = []
     permission_classes = []
 
     def get(self, request, format=None):
-        user_count = self.User.objects.all().count()
-        labels = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange']
-        default_items = [user_count, 123, 33, 20, 5, 80]
+        id_list, result_list, dates_list = [], [], []
+
+        test_result = TestResult.objects.all().values('test_result', 'id', 'test_date')
+        for test in test_result:
+            # for debugging
+            print(f"{test['id']}, {test['test_result']}, {test['test_date'].strftime('%H:%M:%S %b %d %Y')}")
+
+            id_list.append(test['id'])
+            result_list.append(test['test_result'])
+            dates_list.append(test['test_date'].strftime('%H:%M:%S %b %d %Y'))
+
+        labels = dates_list
+        default_items = result_list
+
         data = {
             'labels': labels,
             'default': default_items,

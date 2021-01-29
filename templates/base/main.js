@@ -2,19 +2,38 @@ var endpoint = '/api/chart/data/'
 var defaultData = []
 var labels = []
 
-$.ajax({
-    type: 'GET',
-    url: endpoint,
-    success: function (responseData) {
-        labels = responseData.labels
-        defaultData = responseData.default
-        setChart(labels, defaultData)
-    },
-    error: function (responseData) {
-        console.log('error')
-        console.log(responseData)
-    }
+$(".run-button").click(function(e) {
+    e.preventDefault();
+    console.log('button-pressed')
+    $(".run-button").attr("disabled", true).text("Test running...");
+    $.ajax({
+        type: "POST",
+        url: "/api/test/run/",
+        success: function(result) {
+            setChartAsync();
+            $(".run-button").attr("disabled", false).text("Run again");
+        },
+        error: function(result) {
+            alert('error - please reload page');
+        }
+    });
 });
+
+function setChartAsync() {
+    $.ajax({
+        type: 'GET',
+        url: endpoint,
+        success: function (responseData) {
+            labels = responseData.labels
+            defaultData = responseData.default
+            setChart(labels, defaultData)
+        },
+        error: function (responseData) {
+            console.log('error')
+            console.log(responseData)
+        }
+    });
+}
 
 function setChart(labels, data) {
     var ctx = document.getElementById('myChart').getContext('2d');
@@ -23,7 +42,7 @@ function setChart(labels, data) {
         data: {
             labels: labels,
             datasets: [{
-                label: '# of Votes',
+                label: 'Download speed in Mb/s',
                 data: data,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
@@ -55,3 +74,5 @@ function setChart(labels, data) {
         }
     });
 }
+
+setChartAsync();
