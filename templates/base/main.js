@@ -38,7 +38,6 @@ function setChartAsync() {
 
 
 function setChart(labels, data) {
-
     console.log(data);
     var efficiency = [];
     var coloR = [];
