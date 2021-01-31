@@ -5,20 +5,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from speedtest import Speedtest
-
+from logging import getLogger
 from .models import TestResult
+
+logger = getLogger(__name__)
 
 
 def index(request):
-    return render(request, 'charts/index.html', {'customers': 10})
-
-
-def get_data(reqest):
-    data = {
-        'sales': 100,
-        'customers': 10,
-    }
-    return JsonResponse(data)
+    return render(request, 'charts/index.html')
 
 
 class ChartData(APIView):
@@ -26,23 +20,24 @@ class ChartData(APIView):
     permission_classes = []
 
     def get(self, request, format=None):
-        id_list, result_list, dates_list = [], [], []
+        id_list, result_list, label_list = [], [], []
 
-        test_result = TestResult.objects.all().values('test_result', 'id', 'test_date')
+        test_result = TestResult.objects.all().values(
+            'result', 'id', 'date', 'username')
         for test in test_result:
-            # for debugging
-            print(f"{test['id']}, {test['test_result']}, {test['test_date'].strftime('%H:%M:%S %b %d %Y')}")
+            logger.info(
+                f"{test['username']} - {test['id']}, {test['result']}, {test['date'].strftime('%H:%M:%S %b %d %Y')}"
+            )
 
             id_list.append(test['id'])
-            result_list.append(test['test_result'])
-            dates_list.append(test['test_date'].strftime('%H:%M:%S %b %d %Y'))
+            result_list.append(test['result'])
 
-        labels = dates_list
-        default_items = result_list
+            label_list.append(test['date'].strftime(
+                '%H:%M:%S %b %d %Y') + ' user: ' + test['username'])
 
         data = {
-            'labels': labels,
-            'default': default_items,
+            'labels': label_list,
+            'default': result_list,
         }
         return Response(data)
 
@@ -54,14 +49,18 @@ class RunSpeedTest(APIView):
     def post(self, request, format=None):
         st = Speedtest()
         test_result = '{:.2f}'.format(st.download() / 1024 / 1024)
-        print(test_result)  # in megabytes
+        username = request.POST['username']
 
-        test_instance = TestResult.objects.create(test_result=test_result)
+        test_instance = TestResult.objects.create(
+            result=test_result, username=username)
+        logger.info(f'{test_result} mb/s')
         test_instance.save()
+
         content = {
             'message': 'successful test run',
             'value': test_result,
         }
+
         return Response(content, status=status.HTTP_200_OK)
 
     def get(self, request, format=None):

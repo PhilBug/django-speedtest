@@ -3,12 +3,30 @@ var endpointPOST = '/api/test/run/'
 var defaultData = []
 var labels = []
 
+// disable enter on username input
+$(document).ready(function () {
+    $('form input').keydown(function (event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
+});
+
 $(".run-button").click(function (e) {
     e.preventDefault();
     console.log('button-pressed')
     $(".run-button").attr("disabled", true).text("Test running...");
+    var username = $('#username').val();
+    if (username === "") {
+        username = "unknown"
+    }
+    console.log('username val: ' + username)
     $.ajax({
         type: "POST",
+        data: {
+            'username': username
+        },
         url: endpointPOST,
         success: function (result) {
             setChartAsync();
